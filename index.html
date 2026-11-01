@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091c2e"><title>CAR GPS TRACKER - Mobile</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo+pU3xIuMA6Bs=" crossorigin="anonymous">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#091c2e;--panel:#112a42;--panel2:#18364f;--border:#31516a;--fg:#e7f4ff;--muted:#9ebbd0;--accent:#25ac8b}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg)}body{max-width:1200px;margin:0 auto}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible{outline:2px solid #8ce5fc;outline-offset:2px}
+header{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0e273e;border-bottom:1px solid var(--border)}.brand{font-size:14px;font-weight:850;letter-spacing:.04em;white-space:nowrap}.sub{font-size:10px;color:var(--muted);margin-top:2px}.head-right{display:flex;align-items:center;gap:7px}.pill{font-size:10px;font-weight:800;border-radius:50px;padding:5px 8px;color:#c4d9e4;background:#335165;white-space:nowrap}.pill.on{color:#7dffcf;background:#174b3f}.pill.off{color:#ffc3c1;background:#602e37}.pill.wait{color:#dfeef8;background:#3c5268}.settings{background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12px}
+#message{background:#102b43;color:#cde2f0;padding:6px 12px;font-size:11px;min-height:29px;border-bottom:1px solid #24455e}#message.error{color:#ffb7b7}
+.stats{padding:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.stat{min-width:0;background:var(--panel);border:1px solid #1e415d;border-radius:9px;padding:8px 5px 6px;text-align:center}.stat .k{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}.stat .v{display:block;font-size:18px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px;overflow:hidden;text-overflow:ellipsis}.stat .x{display:block;font-size:9px;color:#8fe6d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat .x.warn{color:#f3be74}.stat .x.bad{color:#ff9ba9}
+.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
+.tools{padding:10px 9px 5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tools label{font-size:12px;color:var(--muted)}input[type=date]{background:var(--panel2);color:var(--fg);border:1px solid var(--border);padding:8px 5px;min-height:41px;border-radius:8px;font-size:13px}.tools button,.action{background:#235274;border:1px solid #547c97;color:var(--fg);border-radius:8px;padding:9px 10px;font-size:12px;min-height:41px;font-weight:700}.tools .spacer{flex:1}.details{display:flex;gap:8px;flex-wrap:wrap;padding:3px 11px 13px;font-size:11px;color:var(--muted)}.details b{color:#d7effb}.help{margin:0 10px 14px;font-size:10px;color:#789caf;line-height:1.45}
+dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19px;color:#e7f4ff;width:min(94vw,410px);box-shadow:0 15px 45px #0009}dialog::backdrop{background:#000c}dialog h2{font-size:18px;margin:0 0 8px}dialog p{font-size:12px;color:#afcbdf;line-height:1.5}dialog label{display:block;font-size:12px;margin-top:13px;color:#c7e1f5}dialog input[type=text],dialog input[type=password]{width:100%;margin-top:5px;border:1px solid #537a96;background:#092039;color:#fff;border-radius:9px;padding:11px;font-size:16px}dialog .check{display:flex;gap:9px;align-items:start;line-height:1.3}dialog .check input{width:17px;height:17px}dialog menu{padding:0;display:flex;gap:8px;justify-content:flex-end;margin:18px 0 0}dialog menu button{padding:10px 14px;border-radius:8px;color:white;border:1px solid #527e96;background:#1a4c6f;font-size:13px}dialog menu button.primary{background:#177c63;border-color:#1bab89}
+@media(max-width:390px){.stats{gap:4px}.stat .v{font-size:16px}.stat .k{font-size:8px}.stat{padding:7px 3px}.brand{font-size:12px}.map-actions button{min-width:69px;padding:8px 6px}#map{height:58dvh;min-height:325px}}
+@media(min-width:780px){.stats{max-width:890px;margin:0 auto}.map-shell{margin:0 12px}#map{height:68vh}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
+<div id="message" role="status" aria-live="polite">Enter the private ThingSpeak Read API key in Settings to connect.</div>
+<section class="stats" aria-label="Live GPS metrics">
+ <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
+ <div class="stat"><span class="k">Motion</span><span class="v" style="font-size:14px;padding:3px 0" id="motion">--</span><span class="x" id="age">No data</span></div>
+ <div class="stat"><span class="k">Satellites</span><span class="v" id="sats">--</span><span class="x" id="gnss">GPS / BeiDou</span></div>
+ <div class="stat"><span class="k">HDOP</span><span class="v" id="hdop">--</span><span class="x" id="quality">--</span></div>
+</section>
+<div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button></div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
+<div class="tools"><label for="routeDate">History:</label><input type="date" id="routeDate"><button id="today" type="button">Today</button><button id="reload" type="button">Refresh</button><div class="spacer"></div></div>
+<div class="details"><span>Altitude: <b id="alt">--</b> m</span><span>Visible date: <b id="viewDate">--</b></span><span>Route distance*: <b id="distance">0.00</b> km</span><span>Positions: <b id="points">0</b></span><span>Last update: <b id="last">--</b></span></div>
+<p class="help">*Route distance is an estimate from filtered GPS points, not the desktop SQLite trip history. The map polls ThingSpeak every 30 s while this page is open. Your computer and phone can read the same channel at the same time.</p>
+<dialog id="settingsDialog"><form id="settingsForm" method="dialog"><h2>ThingSpeak connection</h2><p>Private channel: use the <strong>READ API key</strong> only. Never enter the Write API key. The key is not included in this website's source files.</p><label for="channelId">Channel ID</label><input id="channelId" type="text" inputmode="numeric" required pattern="[0-9]+" value="1421143"><label for="readKey">Read API key</label><input id="readKey" type="password" autocomplete="off" spellcheck="false" placeholder="Private Read API key"><label class="check"><input id="remember" type="checkbox" checked>Remember Read API key on this device</label><p>When enabled, the key stays in this browser's local storage. Use only on your own phone. Without this option, you need to enter it again after refreshing.</p><menu><button type="button" id="cancelSettings">Cancel</button><button class="primary" type="submit">Connect</button></menu></form></dialog>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+<script>
+(()=>{'use strict';
+ const E=id=>document.getElementById(id);
+ const confKey='carGpsMobileV1Config';
+ let channel='1421143',key='',following=true,showRoute=true, map,car,poly,startDot,haveView=false;
+ let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,stablePosition=null;
+ const tz='America/Toronto', clock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'short',day:'numeric'});
+ const num=(v,d=1)=>Number.isFinite(v)?v.toFixed(d):'--';
+ function todayInToronto(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const obj=Object.fromEntries(parts.map(p=>[p.type,p.value]));return `${obj.year}-${obj.month}-${obj.day}`}
+ function hdopQuality(h){if(!Number.isFinite(h))return ['--',''];if(h<1)return ['EXCELLENT',''];if(h<2)return ['GOOD',''];if(h<5)return ['MODERATE','warn'];if(h<10)return ['POOR','bad'];return ['VERY POOR','bad']}
+ function msg(t,err=false){E('message').textContent=t;E('message').classList.toggle('error',err)}
+ function status(t){E('online').textContent=t;E('online').className='pill '+(t==='ONLINE'?'on':t==='OFFLINE'?'off':'wait')}
+ function parse(record){if(!record)return null;const lat=Number(record.field1),lon=Number(record.field2);if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180||!record.field1||!record.field2||lat===0&&lon===0)return null;
+ const val=v=>v==null||String(v).trim()===''?NaN:Number(v);
+ return {lat,lon,speed:val(record.field3),alt:val(record.field4),sat:val(record.field5),gps:val(record.field6),bds:val(record.field7),hdop:val(record.field8),id:Number(record.entry_id)||0,utc:new Date(record.created_at)};}
+ function hav(a,b){const r=Math.PI/180, dlat=(b.lat-a.lat)*r,dlon=(b.lon-a.lon)*r,x=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(x),Math.sqrt(Math.max(0,1-x)))}
+ function filtered(data){let out=[],km=0,prev=null;for(const p of data.map(parse).filter(Boolean).sort((a,b)=>a.utc-b.utc)){if(!prev){out.push(p);prev=p;continue;}const seconds=(p.utc-prev.utc)/1000;if(seconds<=0)continue;const meters=hav(prev,p);if(meters<12)continue;const speed=Number.isFinite(p.speed)?p.speed:0;
+ // Only confirmed driving points add to the visible route; prevent parked jitter.
+ if(speed<3.5)continue;
+ // Suppress implausible GPS jumps (except long gaps, which restart route segments in the future).
+ if(seconds<120 && meters>Math.max(160,seconds*Math.max(speed/3.6,2)*2.8))continue;
+ if(seconds>900){out.push({break:true});out.push(p);prev=p;continue;}
+ out.push(p);km+=meters/1000;prev=p;
+ }return {out,km};}
+ function draw(){const all=filtered(rawDaily);E('distance').textContent=all.km.toFixed(2);E('points').textContent=String(all.out.filter(p=>!p.break).length);E('viewDate').textContent=routeDate;
+ if(!map)return; if(poly){map.removeLayer(poly);poly=null;}if(startDot){map.removeLayer(startDot);startDot=null;}
+ const segments=[];let seg=[];for(const p of all.out){if(p.break){if(seg.length)segments.push(seg);seg=[];}else seg.push([p.lat,p.lon]);}if(seg.length)segments.push(seg);
+ if(showRoute){poly=L.featureGroup(segments.map(s=>L.polyline(s,{color:'#1379ed',weight:4,opacity:.85}))).addTo(map);const first=all.out.find(p=>!p.break);if(first&&segments.some(s=>s.length>1)){startDot=L.circleMarker([first.lat,first.lon],{radius:5,color:'white',weight:2,fillColor:'#1ca96c',fillOpacity:1}).addTo(map);}}
+ let marker;
+ if(routeDate===todayInToronto()&&latestRecord){
+   marker=parse(latestRecord);
+   if(marker){
+     if(stablePosition && (!Number.isFinite(marker.speed) || marker.speed<3.5 || hav(stablePosition,marker)<12))marker=stablePosition;
+     else stablePosition=marker;
+   }
+ } else marker=rawDaily.map(parse).filter(Boolean).at(-1);
+ if(marker){const pos=[marker.lat,marker.lon];car.setLatLng(pos);if(!map.hasLayer(car))car.addTo(map);if(!haveView){map.setView(pos,15);haveView=true;}else if(following&&routeDate===todayInToronto())map.panTo(pos);E('mapInfo').textContent=(routeDate===todayInToronto()?'Vehicle position':'Historical position')+'  '+num(marker.lat,5)+', '+num(marker.lon,5);}
+ else if(!haveView){E('mapInfo').textContent='No valid GPS position on selected date';}
+ }
+ function updateMetrics(rec){latestRecord=rec;if(!rec){status('WAITING');return;}const p=parse(rec);if(!p){status('OFFLINE');msg('ThingSpeak returned no valid GPS coordinates.',true);return;}const age=(Date.now()-p.utc.getTime())/1000;status(age<120?'ONLINE':'OFFLINE');E('speed').textContent=num(p.speed);E('sats').textContent=Number.isFinite(p.sat)?Math.round(p.sat):'--';E('gnss').textContent=`GPS ${Number.isFinite(p.gps)?Math.round(p.gps):'-'} / BDS ${Number.isFinite(p.bds)?Math.round(p.bds):'-'}`;E('hdop').textContent=num(p.hdop,2);const [q,c]=hdopQuality(p.hdop);E('quality').textContent=q;E('quality').className='x '+c;E('alt').textContent=num(p.alt);E('last').textContent=Number.isNaN(p.utc.getTime())?'--':clock.format(p.utc);
+ E('age').textContent=age<0?'Just updated':Math.round(age/60)+' min ago';
+ const pairs=rawDaily.map(parse).filter(Boolean);const lastPrev=pairs.filter(x=>x.id<p.id).at(-1),moving=Number.isFinite(p.speed)&&p.speed>=3.5&&!!lastPrev&&hav(lastPrev,p)>=12;
+ E('motion').textContent=age>=120?'OFFLINE':moving?'MOVING':'PARKED';
+ if(age>=120)msg('Last GPS update is more than 2 minutes old. Showing saved position.');
+ else msg('Receiving GPS data directly from ThingSpeak. PC is not required.');}
+ async function getFeed(params){const q=new URLSearchParams(params);if(key)q.set('api_key',key);const u=`https://api.thingspeak.com/channels/${channel}/feeds.json?${q}`;
+ const controller=new AbortController(),id=setTimeout(()=>controller.abort(),16000);
+ try{const res=await fetch(u,{cache:'no-store',signal:controller.signal,credentials:'omit'});if(!res.ok)throw new Error('ThingSpeak HTTP '+res.status);const json=await res.json();if(!json||!Array.isArray(json.feeds))throw new Error('Invalid ThingSpeak response');return json.feeds;}finally{clearTimeout(id);}}
+ async function loadDate(){if(!key){msg('Open Settings and enter your private Read API key.');return;}if(loading)return;loading=true;E('reload').disabled=true;const chosen=routeDate;
+ try{msg('Loading route for '+chosen+' ...');const rows=await getFeed({start:chosen+' 00:00:00',end:chosen+' 23:59:59',timezone:tz,results:'8000'});if(chosen!==routeDate)return;rawDaily=rows;stablePosition=null;draw();if(rows.length>=8000)msg('Reached 8000 ThingSpeak points for this day. Earlier positions may be omitted.');else if(!rows.length)msg('No positions found for '+chosen+'.');else msg('Route loaded ('+rows.length+' entries).');await poll();
+ }catch(e){msg('Cannot read ThingSpeak: '+e.message+'. Check Read key and connection. A browser CORS error may require a different hosting setup.',true);}finally{loading=false;E('reload').disabled=false;}}
+ async function poll(){
+   if(!key)return;
+   try{
+     const rows=await getFeed({results:'100'});
+     if(!rows.length){status('OFFLINE');msg('No data available from ThingSpeak.',true);return;}
+     if(routeDate===todayInToronto()){
+       const unique=new Map(rawDaily.map(r=>[Number(r.entry_id),r]));
+       for(const row of rows){const p=parse(row);if(p && todayForDate(p.utc)===routeDate)unique.set(Number(row.entry_id),row);}
+       rawDaily=Array.from(unique.values()).sort((a,b)=>Number(a.entry_id)-Number(b.entry_id)).slice(-8000);
+     }
+     updateMetrics(rows.at(-1));draw();
+   }catch(e){status('OFFLINE');msg('ThingSpeak update failed: '+e.message+'. Check internet and Read API key.',true);}
+ }
+ function todayForDate(d){const arr=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);const o=Object.fromEntries(arr.map(x=>[x.type,x.value]));return `${o.year}-${o.month}-${o.day}`}
+ function setFollow(){E('follow').textContent=following?'Follow ON':'Follow OFF';E('follow').classList.toggle('active',following)}
+ function setRoute(){E('route').textContent=showRoute?'Hide route':'Show route';E('route').classList.toggle('active',showRoute);draw()}
+ function initMap(){if(typeof L==='undefined'){msg('Map library did not load. Check internet or disable content blocking.',true);return;}map=L.map('map',{zoomControl:false}).setView([45.5,-73.5],7);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);L.control.zoom({position:'bottomright'}).addTo(map);car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});map.on('dragstart',()=>{following=false;setFollow()});}
+ function openDialog(){E('channelId').value=channel;E('readKey').value=key;E('settingsDialog').showModal();}
+ E('openSettings').onclick=openDialog;E('cancelSettings').onclick=()=>E('settingsDialog').close();E('settingsForm').addEventListener('submit',e=>{e.preventDefault();const id=E('channelId').value.trim(),k=E('readKey').value.trim();if(!/^\d+$/.test(id)){E('channelId').setCustomValidity('Channel ID must be a number.');E('channelId').reportValidity();return;}E('channelId').setCustomValidity('');channel=id;key=k;try{if(E('remember').checked)localStorage.setItem(confKey,JSON.stringify({channel,key}));else localStorage.removeItem(confKey);}catch{}E('settingsDialog').close();loadDate();});
+ E('follow').onclick=()=>{following=!following;setFollow();if(following&&car&&map&&map.hasLayer(car))map.panTo(car.getLatLng())};E('route').onclick=()=>{showRoute=!showRoute;setRoute()};
+ E('fit').onclick=()=>{const pts=filtered(rawDaily).out.filter(p=>!p.break);if(!map||!pts.length)return;following=false;setFollow();const bounds=L.latLngBounds(pts.map(p=>[p.lat,p.lon]));if(pts.length<2)map.setView(bounds.getCenter(),15);else map.fitBounds(bounds.pad(.16));};
+ E('routeDate').onchange=()=>{routeDate=E('routeDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(routeDate))return;following=false;setFollow();haveView=false;loadDate()};E('today').onclick=()=>{routeDate=todayInToronto();E('routeDate').value=routeDate;following=true;setFollow();haveView=false;loadDate();};E('reload').onclick=loadDate;
+ try{const stored=JSON.parse(localStorage.getItem(confKey)||'null');if(stored && /^\d+$/.test(stored.channel)){channel=stored.channel;key=stored.key||'';}}catch{}
+ initMap();routeDate=todayInToronto();E('routeDate').value=routeDate;
+ if(key)loadDate();else openDialog();timer=setInterval(()=>{if(!loading)poll()},30000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&key&&!loading)poll()});
+})();
+</script>
+</body></html>
