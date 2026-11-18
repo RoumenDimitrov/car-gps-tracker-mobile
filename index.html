@@ -1,145 +1,307 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#091c2e">
-<title>CAR GPS TRACKER - Mobile</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091c2e"><title>CAR GPS TRACKER - Mobile V2.1 Trips & Parking</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-
-<!-- Main and alternative Leaflet stylesheets -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo+pU3xIuMA6Bs=" crossorigin="anonymous">
 <style>
-/* Built-in essential Leaflet layout. This prevents scattered map tiles on phones
-   even if an external stylesheet is blocked or temporarily unavailable. */
-.leaflet-container{position:relative;overflow:hidden;outline-offset:1px;touch-action:pan-x pan-y;background:#d6e2dc}
-.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-image-layer,.leaflet-layer,.leaflet-zoom-box{position:absolute;left:0;top:0}
-.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
-.leaflet-tile-container{pointer-events:none}.leaflet-zoom-animated{transform-origin:0 0}
-.leaflet-container img.leaflet-tile,.leaflet-container img.leaflet-image-layer{max-width:none!important;max-height:none!important;object-fit:fill;border:0;padding:0;margin:0}
-.leaflet-container img.leaflet-tile{display:block;box-sizing:content-box;width:256px;height:256px}
-.leaflet-tile{visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
-.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}.leaflet-top{top:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-right{right:0}
-.leaflet-control{position:relative;z-index:800;pointer-events:auto;float:left;clear:both}.leaflet-right .leaflet-control{float:right;margin-right:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
-.leaflet-control-zoom{border:2px solid #0003;border-radius:5px;overflow:hidden}.leaflet-control-zoom a{display:block;width:30px;height:30px;line-height:30px;text-align:center;background:#fff;color:#222;text-decoration:none;font:bold 21px Arial;cursor:pointer}.leaflet-control-zoom a+a{border-top:1px solid #ccc}
-.leaflet-control-attribution{padding:1px 5px;color:#333;background:#fffd;font:10px/1.4 Arial,sans-serif}.leaflet-control-attribution a{color:#0078a8;text-decoration:none}
-
 :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#091c2e;--panel:#112a42;--panel2:#18364f;--border:#31516a;--fg:#e7f4ff;--muted:#9ebbd0;--accent:#25ac8b}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg)}body{max-width:1200px;margin:0 auto}button,input{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible{outline:2px solid #8ce5fc;outline-offset:2px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg)}body{max-width:1200px;margin:0 auto}button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #8ce5fc;outline-offset:2px}
 header{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0e273e;border-bottom:1px solid var(--border)}.brand{font-size:14px;font-weight:850;letter-spacing:.04em;white-space:nowrap}.sub{font-size:10px;color:var(--muted);margin-top:2px}.head-right{display:flex;align-items:center;gap:7px}.pill{font-size:10px;font-weight:800;border-radius:50px;padding:5px 8px;color:#c4d9e4;background:#335165;white-space:nowrap}.pill.on{color:#7dffcf;background:#174b3f}.pill.off{color:#ffc3c1;background:#602e37}.pill.wait{color:#dfeef8;background:#3c5268}.settings{background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12px}
 #message{background:#102b43;color:#cde2f0;padding:6px 12px;font-size:11px;min-height:29px;border-bottom:1px solid #24455e}#message.error{color:#ffb7b7}
 .stats{padding:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.stat{min-width:0;background:var(--panel);border:1px solid #1e415d;border-radius:9px;padding:8px 5px 6px;text-align:center}.stat .k{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}.stat .v{display:block;font-size:18px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px;overflow:hidden;text-overflow:ellipsis}.stat .x{display:block;font-size:9px;color:#8fe6d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat .x.warn{color:#f3be74}.stat .x.bad{color:#ff9ba9}
-.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.map-actions{position:absolute;z-index:900;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.map-overlay{position:absolute;z-index:900;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
+.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
 .tools{padding:10px 9px 5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tools label{font-size:12px;color:var(--muted)}input[type=date]{background:var(--panel2);color:var(--fg);border:1px solid var(--border);padding:8px 5px;min-height:41px;border-radius:8px;font-size:13px}.tools button,.action{background:#235274;border:1px solid #547c97;color:var(--fg);border-radius:8px;padding:9px 10px;font-size:12px;min-height:41px;font-weight:700}.tools .spacer{flex:1}.details{display:flex;gap:8px;flex-wrap:wrap;padding:3px 11px 13px;font-size:11px;color:var(--muted)}.details b{color:#d7effb}.help{margin:0 10px 14px;font-size:10px;color:#789caf;line-height:1.45}
+.trip-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:1px 9px 3px}.trip-toolbar label{font-size:12px;color:var(--muted)}
+.trip-toolbar select{min-width:0;flex:1 1 165px;max-width:430px;background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 9px;min-height:42px;font-size:13px}
+.trip-toolbar button,.edit-tools button{background:#235274;color:var(--fg);border:1px solid #547c97;border-radius:8px;padding:9px 10px;font-size:12px;font-weight:700;min-height:42px}
+.trip-toolbar .new-trip{background:#168268;border-color:#38bfa1;white-space:nowrap}
+.trip-message{padding:3px 11px 7px;font-size:11px;color:#acd5e7}
+.trip-edit{margin:2px 9px 7px;padding:6px 10px;background:#10283c;border:1px solid #244761;border-radius:8px;font-size:11px;color:#b6d7e9}
+.trip-edit summary{cursor:pointer;font-weight:600;min-height:25px;align-content:center}.edit-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:9px 0 6px}
+.edit-tools label{color:#b9d9e9}.edit-tools input[type=time]{background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px;min-height:42px;color-scheme:dark}
+.edit-tools button:disabled{opacity:.4;cursor:not-allowed}.trip-edit small{display:block;line-height:1.45;color:#92b4c8;margin:3px 0 2px}
 dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19px;color:#e7f4ff;width:min(94vw,410px);box-shadow:0 15px 45px #0009}dialog::backdrop{background:#000c}dialog h2{font-size:18px;margin:0 0 8px}dialog p{font-size:12px;color:#afcbdf;line-height:1.5}dialog label{display:block;font-size:12px;margin-top:13px;color:#c7e1f5}dialog input[type=text],dialog input[type=password]{width:100%;margin-top:5px;border:1px solid #537a96;background:#092039;color:#fff;border-radius:9px;padding:11px;font-size:16px}dialog .check{display:flex;gap:9px;align-items:start;line-height:1.3}dialog .check input{width:17px;height:17px}dialog menu{padding:0;display:flex;gap:8px;justify-content:flex-end;margin:18px 0 0}dialog menu button{padding:10px 14px;border-radius:8px;color:white;border:1px solid #527e96;background:#1a4c6f;font-size:13px}dialog menu button.primary{background:#177c63;border-color:#1bab89}
 @media(max-width:390px){.stats{gap:4px}.stat .v{font-size:16px}.stat .k{font-size:8px}.stat{padding:7px 3px}.brand{font-size:12px}.map-actions button{min-width:69px;padding:8px 6px}#map{height:58dvh;min-height:325px}}
 @media(min-width:780px){.stats{max-width:890px;margin:0 auto}.map-shell{margin:0 12px}#map{height:68vh}}
 </style>
 </head>
 <body>
-<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
+<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.1</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
 <div id="message" role="status" aria-live="polite">Enter the private ThingSpeak Read API key in Settings to connect.</div>
 <section class="stats" aria-label="Live GPS metrics">
-  <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
-  <div class="stat"><span class="k">Motion</span><span class="v" style="font-size:14px;padding:3px 0" id="motion">--</span><span class="x" id="age">No data</span></div>
-  <div class="stat"><span class="k">Satellites</span><span class="v" id="sats">--</span><span class="x" id="gnss">GPS / BeiDou</span></div>
-  <div class="stat"><span class="k">HDOP</span><span class="v" id="hdop">--</span><span class="x" id="quality">--</span></div>
+ <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
+ <div class="stat"><span class="k">Motion</span><span class="v" style="font-size:14px;padding:3px 0" id="motion">--</span><span class="x" id="age">No data</span></div>
+ <div class="stat"><span class="k">Satellites</span><span class="v" id="sats">--</span><span class="x" id="gnss">GPS / BeiDou</span></div>
+ <div class="stat"><span class="k">HDOP</span><span class="v" id="hdop">--</span><span class="x" id="quality">--</span></div>
 </section>
 <div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button></div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
-<div class="tools"><label for="routeDate">History:</label><input type="date" id="routeDate"><button id="today" type="button">Today</button><button id="reload" type="button">Refresh</button><div class="spacer"></div></div>
+<div class="tools"><label for="routeDate">History:</label><input type="date" id="routeDate"><button id="today" type="button">Today</button><button id="reload" type="button">Refresh</button></div>
+<div class="trip-toolbar"><label for="tripSelect">Trip:</label><select id="tripSelect" aria-label="Choose trip"><option value="latest">Latest trip</option><option value="all">All trips</option></select><button id="newTrip" type="button" class="new-trip">+ New Trip</button></div>
+<div class="trip-message"><strong id="tripCount">0</strong> trip(s) detected · Choose one trip for a clean map. "All trips" shows separate colored routes.</div>
+<details class="trip-edit"><summary>Split older trips / Undo manual split</summary><div class="edit-tools"><label for="splitTime">Next trip started at (Toronto time)</label><input type="time" id="splitTime"><button id="splitAtTime" type="button">Split at time</button><button id="undoSplit" type="button">Undo last split</button></div><small>New Trip marks the next incoming GPS data as a separate trip. Splits are saved only in this browser, not in ThingSpeak or the Windows database.</small></details>
 <div class="details"><span>Altitude: <b id="alt">--</b> m</span><span>Visible date: <b id="viewDate">--</b></span><span>Route distance*: <b id="distance">0.00</b> km</span><span>Positions: <b id="points">0</b></span><span>Last update: <b id="last">--</b></span></div>
-<p class="help">*Route distance is an estimate from filtered GPS points, not the desktop SQLite trip history. The map polls ThingSpeak every 30 s while this page is open. Your computer and phone can read the same channel at the same time.</p>
+<p class="help">*Distance is calculated separately for each trip from filtered GPS positions. Automatic trip split after 10 min stopped or a 10 min gap in telemetry. Manual split markers stay only on this phone/browser. Nothing is written to ThingSpeak, and the Windows application is unchanged. The mobile page refreshes every 30 seconds while open.</p>
 <dialog id="settingsDialog"><form id="settingsForm" method="dialog"><h2>ThingSpeak connection</h2><p>Private channel: use the <strong>READ API key</strong> only. Never enter the Write API key. The key is not included in this website's source files.</p><label for="channelId">Channel ID</label><input id="channelId" type="text" inputmode="numeric" required pattern="[0-9]+" value="1421143"><label for="readKey">Read API key</label><input id="readKey" type="password" autocomplete="off" spellcheck="false" placeholder="Private Read API key"><label class="check"><input id="remember" type="checkbox" checked>Remember Read API key on this device</label><p>When enabled, the key stays in this browser's local storage. Use only on your own phone. Without this option, you need to enter it again after refreshing.</p><menu><button type="button" id="cancelSettings">Cancel</button><button class="primary" type="submit">Connect</button></menu></form></dialog>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script>if(!window.L){document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>')}</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script>
 (()=>{'use strict';
-  const E=id=>document.getElementById(id);
-  const confKey='carGpsMobileV1Config';
-  let channel='1421143',key='',following=true,showRoute=true,map,car,poly,startDot,haveView=false;
-  let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,stablePosition=null;
-  const tz='America/Toronto', clock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'short',day:'numeric'});
-  const num=(v,d=1)=>Number.isFinite(v)?v.toFixed(d):'--';
-  function todayInToronto(){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const obj=Object.fromEntries(parts.map(p=>[p.type,p.value]));return `${obj.year}-${obj.month}-${obj.day}`}
-  function hdopQuality(h){if(!Number.isFinite(h))return ['--',''];if(h<1)return ['EXCELLENT',''];if(h<2)return ['GOOD',''];if(h<5)return ['MODERATE','warn'];if(h<10)return ['POOR','bad'];return ['VERY POOR','bad']}
-  function msg(t,err=false){E('message').textContent=t;E('message').classList.toggle('error',err)}
-  function status(t){E('online').textContent=t;E('online').className='pill '+(t==='ONLINE'?'on':t==='OFFLINE'?'off':'wait')}
-  function parse(record){if(!record)return null;const lat=Number(record.field1),lon=Number(record.field2);if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180||!record.field1||!record.field2||(lat===0&&lon===0))return null;
-    const val=v=>v==null||String(v).trim()===''?NaN:Number(v);
-    return {lat,lon,speed:val(record.field3),alt:val(record.field4),sat:val(record.field5),gps:val(record.field6),bds:val(record.field7),hdop:val(record.field8),id:Number(record.entry_id)||0,utc:new Date(record.created_at)};
+ const E=id=>document.getElementById(id);
+ const confKey='carGpsMobileV1Config';
+ const tz='America/Toronto';
+ const clock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'short',day:'numeric'});
+ const timeClock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
+ const numeric=(v,d=1)=>Number.isFinite(v)?v.toFixed(d):'--';
+ const speedThreshold=3.5, minimumMoveM=12, minimumTripM=20;
+ const parkingSplitMs=10*60*1000, dataGapMs=10*60*1000, liveGapMs=120*1000;
+ const palette=['#167bf1','#e89b25','#10aa85','#b66be5','#ec597c','#38a9c7','#a6b543'];
+ let channel='1421143',key='',following=true,showRoute=true,map,car,routeLayers=[],haveView=false;
+ let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,stablePosition=null;
+ let tripSelection='latest',detectedTrips=[],highlightedTrips=[];
+ const splitStorageKey=()=>`carGpsMobileV2Splits:${channel}:${routeDate}`;
+ function msg(text,err=false){E('message').textContent=text;E('message').classList.toggle('error',err)}
+ function status(state){E('online').textContent=state;E('online').className='pill '+(state==='ONLINE'?'on':state==='OFFLINE'?'off':'wait')}
+ function dateInToronto(date){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(date);const a=Object.fromEntries(parts.map(p=>[p.type,p.value]));return `${a.year}-${a.month}-${a.day}`}
+ function todayInToronto(){return dateInToronto(new Date())}
+ function hdopQuality(h){if(!Number.isFinite(h))return ['--',''];if(h<1)return ['EXCELLENT',''];if(h<2)return ['GOOD',''];if(h<5)return ['MODERATE','warn'];if(h<10)return ['POOR','bad'];return ['VERY POOR','bad']}
+ function parse(record){if(!record)return null;
+  const lat=Number(record.field1),lon=Number(record.field2),utc=new Date(record.created_at);
+  if(!record.field1||!record.field2||!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180||(lat===0&&lon===0)||!Number.isFinite(utc.getTime()))return null;
+  const val=v=>v==null||String(v).trim()===''?NaN:Number(v);
+  return {lat,lon,speed:val(record.field3),alt:val(record.field4),sat:val(record.field5),gps:val(record.field6),bds:val(record.field7),hdop:val(record.field8),id:Number(record.entry_id)||0,utc};
+ }
+ function hav(a,b){const r=Math.PI/180,dlat=(b.lat-a.lat)*r,dlon=(b.lon-a.lon)*r,x=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(x),Math.sqrt(Math.max(0,1-x)))}
+ function validSorted(rows){return rows.map(parse).filter(Boolean).sort((a,b)=>a.utc-b.utc||a.id-b.id)}
+ // Distinguish valid movement from GPS jitter; speed alone is not enough.
+ function isMovingPoint(p,prev){
+  if(!p||!prev||!Number.isFinite(p.speed)||p.speed<speedThreshold)return false;
+  const seconds=(p.utc-prev.utc)/1000;
+  if(seconds<=0||seconds>liveGapMs/1000)return false;
+  const distance=hav(prev,p);
+  if(distance<minimumMoveM)return false;
+  const typicalKmh=Math.max(p.speed,Number.isFinite(prev.speed)?prev.speed:0);
+  const plausibleMax=Math.max(120,(typicalKmh/3.6)*seconds*2.5+35);
+  return distance<=plausibleMax;
+ }
+ // Stop duration counts only continuous, recent GPS updates. A data outage is
+ // OFFLINE, not PARKED, and cannot establish a parking start time.
+ function motionState(latest,rows){
+  const ageMs=Math.max(0,Date.now()-latest.utc.getTime());
+  if(ageMs>=liveGapMs)return {name:'OFFLINE',durationMs:0};
+  const points=validSorted(rows).filter(p=>p.utc.getTime()<=latest.utc.getTime());
+  const last=points.at(-1);
+  if(!last)return {name:'STOPPED',durationMs:0};
+  if(points.length>=2&&isMovingPoint(last,points.at(-2)))return {name:'MOVING',durationMs:0};
+  let stoppedSince=last.utc.getTime();
+  for(let i=points.length-1;i>=1;i--){
+   const cur=points[i],prev=points[i-1];
+   if(cur.utc-prev.utc>liveGapMs)break;
+   if(isMovingPoint(cur,prev))break;
+   stoppedSince=prev.utc.getTime();
   }
-  function hav(a,b){const r=Math.PI/180,dlat=(b.lat-a.lat)*r,dlon=(b.lon-a.lon)*r,x=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(x),Math.sqrt(Math.max(0,1-x)))}
-  function filtered(data){let out=[],km=0,prev=null;for(const p of data.map(parse).filter(Boolean).sort((a,b)=>a.utc-b.utc)){
-    if(!prev){out.push(p);prev=p;continue;}const seconds=(p.utc-prev.utc)/1000;if(seconds<=0)continue;const meters=hav(prev,p);if(meters<12)continue;const speed=Number.isFinite(p.speed)?p.speed:0;
-    // Only confirmed driving points add to the visible route; prevent parked jitter.
-    if(speed<3.5)continue;
-    // Suppress implausible GPS jumps.
-    if(seconds<120&&meters>Math.max(160,seconds*Math.max(speed/3.6,2)*2.8))continue;
-    if(seconds>900){out.push({break:true});out.push(p);prev=p;continue;}
-    out.push(p);km+=meters/1000;prev=p;
-  }return {out,km};}
-  function draw(){const all=filtered(rawDaily);E('distance').textContent=all.km.toFixed(2);E('points').textContent=String(all.out.filter(p=>!p.break).length);E('viewDate').textContent=routeDate;
-    if(!map)return;if(poly){map.removeLayer(poly);poly=null;}if(startDot){map.removeLayer(startDot);startDot=null;}
-    const segments=[];let seg=[];for(const p of all.out){if(p.break){if(seg.length)segments.push(seg);seg=[];}else seg.push([p.lat,p.lon]);}if(seg.length)segments.push(seg);
-    if(showRoute){poly=L.featureGroup(segments.map(s=>L.polyline(s,{color:'#1379ed',weight:4,opacity:.85}))).addTo(map);const first=all.out.find(p=>!p.break);if(first&&segments.some(s=>s.length>1)){startDot=L.circleMarker([first.lat,first.lon],{radius:5,color:'white',weight:2,fillColor:'#1ca96c',fillOpacity:1}).addTo(map);}}
-    let marker;
-    if(routeDate===todayInToronto()&&latestRecord){marker=parse(latestRecord);if(marker){if(stablePosition&&(!Number.isFinite(marker.speed)||marker.speed<3.5||hav(stablePosition,marker)<12))marker=stablePosition;else stablePosition=marker;}}
-    else marker=rawDaily.map(parse).filter(Boolean).at(-1);
-    if(marker){const pos=[marker.lat,marker.lon];car.setLatLng(pos);if(!map.hasLayer(car))car.addTo(map);if(!haveView){map.setView(pos,15);haveView=true;}else if(following&&routeDate===todayInToronto())map.panTo(pos);E('mapInfo').textContent=(routeDate===todayInToronto()?'Vehicle position':'Historical position')+'  '+num(marker.lat,5)+', '+num(marker.lon,5);}
-    else if(!haveView){E('mapInfo').textContent='No valid GPS position on selected date';}
+  const durationMs=Math.max(0,last.utc.getTime()-stoppedSince);
+  return {name:durationMs>=parkingSplitMs?'PARKED':'STOPPED',durationMs};
+ }
+
+ function loadSplits(){try{const v=JSON.parse(localStorage.getItem(splitStorageKey())||'[]');return Array.isArray(v)?[...new Set(v.filter(n=>Number.isInteger(n)&&n>0))].sort((a,b)=>a-b):[]}catch{return []}}
+ function saveSplits(values){try{localStorage.setItem(splitStorageKey(),JSON.stringify([...new Set(values)].sort((a,b)=>a-b)));return true}catch{msg('Could not save trip markers in this browser. Check storage permissions.',true);return false}}
+ // Separate raw samples by manually marked boundaries, a substantial parking period,
+ // or a gap in incoming telemetry. Neither the GPS feed nor Windows SQLite is modified.
+ function segmentTrips(rows,markers=[]){
+  const points=validSorted(rows),chunks=[];
+  let chunk=[],previous=null,stationarySince=null;
+  const forced=new Set(markers);
+  function flush(){if(chunk.length)chunks.push(chunk);chunk=[];stationarySince=null}
+  for(const p of points){
+   const gap=previous?p.utc-previous.utc:0;
+   const forcedBreak=previous&&[...forced].some(id=>previous.id<=id&&p.id>id);
+   const moving=isMovingPoint(p,previous);
+   const parkedLongEnough=moving&&stationarySince!==null&&
+    p.utc.getTime()-stationarySince>=parkingSplitMs&&
+    chunk.some((q,i)=>i>0&&isMovingPoint(q,chunk[i-1]));
+   // A long data gap is a track discontinuity, not proof of parking.
+   if(previous&&(forcedBreak||gap>=dataGapMs||parkedLongEnough))flush();
+   if(moving)stationarySince=null;
+   else if(stationarySince===null)stationarySince=p.utc.getTime();
+   chunk.push(p);previous=p;
   }
-  function updateMetrics(rec){latestRecord=rec;if(!rec){status('WAITING');return;}const p=parse(rec);if(!p){status('OFFLINE');msg('ThingSpeak returned no valid GPS coordinates.',true);return;}const age=(Date.now()-p.utc.getTime())/1000;status(age<120?'ONLINE':'OFFLINE');E('speed').textContent=num(p.speed);E('sats').textContent=Number.isFinite(p.sat)?Math.round(p.sat):'--';E('gnss').textContent=`GPS ${Number.isFinite(p.gps)?Math.round(p.gps):'-'} / BDS ${Number.isFinite(p.bds)?Math.round(p.bds):'-'}`;E('hdop').textContent=num(p.hdop,2);const [q,c]=hdopQuality(p.hdop);E('quality').textContent=q;E('quality').className='x '+c;E('alt').textContent=num(p.alt);E('last').textContent=Number.isNaN(p.utc.getTime())?'--':clock.format(p.utc);
-    E('age').textContent=age<0?'Just updated':Math.round(age/60)+' min ago';
-    const pairs=rawDaily.map(parse).filter(Boolean);const lastPrev=pairs.filter(x=>x.id<p.id).at(-1),moving=Number.isFinite(p.speed)&&p.speed>=3.5&&!!lastPrev&&hav(lastPrev,p)>=12;
-    E('motion').textContent=age>=120?'OFFLINE':moving?'MOVING':'PARKED';
-    if(age>=120)msg('Last GPS update is more than 2 minutes old. Showing saved position.');else msg('Receiving GPS data directly from ThingSpeak. PC is not required.');
+  flush();
+  const trips=[];
+  for(const raw of chunks){
+   // Keep movement confirmed by both the speed reported by GPS and GPS geometry.
+   const driving=raw.filter((p,i)=>i>0&&isMovingPoint(p,raw[i-1]));
+   if(driving.length<2)continue;
+   const trace=[];let meters=0;
+   for(const p of driving){
+    if(!trace.length){trace.push(p);continue}
+    const prev=trace.at(-1),seconds=(p.utc-prev.utc)/1000;
+    if(seconds<=0)continue;
+    const distance=hav(prev,p);
+    if(distance<minimumMoveM)continue;
+    const typicalKmh=Math.max(p.speed,Number.isFinite(prev.speed)?prev.speed:0);
+    const maxMeters=Math.max(120,(typicalKmh/3.6)*seconds*2.5+35);
+    if(seconds<180&&distance>maxMeters)continue;
+    if(seconds>dataGapMs/1000)continue;
+    trace.push(p);meters+=distance;
+   }
+   if(trace.length<2||meters<minimumTripM)continue;
+   const first=trace[0],last=trace.at(-1);
+   trips.push({id:`trip-${first.id}`,start:first.utc,end:last.utc,points:trace,meters,firstId:first.id,lastId:last.id});
   }
-  async function getFeed(params){const q=new URLSearchParams(params);if(key)q.set('api_key',key);const u=`https://api.thingspeak.com/channels/${channel}/feeds.json?${q}`;
-    const controller=new AbortController(),id=setTimeout(()=>controller.abort(),16000);
-    try{const res=await fetch(u,{cache:'no-store',signal:controller.signal,credentials:'omit'});if(!res.ok)throw new Error('ThingSpeak HTTP '+res.status);const json=await res.json();if(!json||!Array.isArray(json.feeds))throw new Error('Invalid ThingSpeak response');return json.feeds;}finally{clearTimeout(id);}
+  return trips;
+ }
+ function refreshTripOptions(){
+   const select=E('tripSelect'),old=tripSelection;select.replaceChildren();
+   const option=(val,label)=>{const node=document.createElement('option');node.value=val;node.textContent=label;select.appendChild(node)};
+   option('latest','Latest trip');option('all','All trips');
+   detectedTrips.forEach((t,i)=>option(t.id,`Trip ${i+1} · ${timeClock.format(t.start)} · ${(t.meters/1000).toFixed(2)} km`));
+   if(old!=='latest'&&old!=='all'&&!detectedTrips.some(t=>t.id===old))tripSelection='latest';
+   select.value=tripSelection;E('tripCount').textContent=String(detectedTrips.length);
+   const markers=loadSplits();E('undoSplit').disabled=markers.length===0;
+ }
+ function activeTrips(){
+  if(tripSelection==='all')return detectedTrips;
+  if(tripSelection==='latest')return detectedTrips.length?[detectedTrips.at(-1)]:[];
+  const t=detectedTrips.find(x=>x.id===tripSelection);return t?[t]:[];
+ }
+ function clearLayers(){if(!map)return;routeLayers.forEach(layer=>map.removeLayer(layer));routeLayers=[]}
+ function draw(){
+  detectedTrips=segmentTrips(rawDaily,loadSplits());refreshTripOptions();highlightedTrips=activeTrips();
+  const meters=highlightedTrips.reduce((sum,t)=>sum+t.meters,0);
+  const positions=highlightedTrips.reduce((sum,t)=>sum+t.points.length,0);
+  E('distance').textContent=(meters/1000).toFixed(2);
+  E('points').textContent=String(positions);
+  E('viewDate').textContent=routeDate;
+  if(!map)return;
+  clearLayers();
+  if(showRoute){
+   highlightedTrips.forEach(t=>{
+    const index=detectedTrips.indexOf(t),color=palette[index%palette.length],name=`Trip ${index+1}`;
+    const line=L.polyline(t.points.map(p=>[p.lat,p.lon]),{color,weight:4,opacity:.89});
+    line.bindPopup(`${name} · ${(t.meters/1000).toFixed(2)} km · ${timeClock.format(t.start)}–${timeClock.format(t.end)}`);
+    line.addTo(map);routeLayers.push(line);
+    const start=L.circleMarker([t.points[0].lat,t.points[0].lon],{radius:5,color:'#fff',weight:2,fillColor:'#09a977',fillOpacity:1}).bindTooltip(`${name} START`).addTo(map);
+    const finish=L.circleMarker([t.points.at(-1).lat,t.points.at(-1).lon],{radius:5,color:'#fff',weight:2,fillColor:color,fillOpacity:1}).bindTooltip(`${name} END`).addTo(map);
+    routeLayers.push(start,finish);
+   });
   }
-  async function loadDate(){if(!key){msg('Open Settings and enter your private Read API key.');return;}if(loading)return;loading=true;E('reload').disabled=true;const chosen=routeDate;
-    try{msg('Loading route for '+chosen+' ...');const rows=await getFeed({start:chosen+' 00:00:00',end:chosen+' 23:59:59',timezone:tz,results:'8000'});if(chosen!==routeDate)return;rawDaily=rows;stablePosition=null;draw();if(rows.length>=8000)msg('Reached 8000 ThingSpeak points for this day. Earlier positions may be omitted.');else if(!rows.length)msg('No positions found for '+chosen+'.');else msg('Route loaded ('+rows.length+' entries).');await poll();}
-    catch(e){msg('Cannot read ThingSpeak: '+e.message+'. Check Read key and connection.',true);}finally{loading=false;E('reload').disabled=false;}
-  }
-  async function poll(){if(!key)return;
-    try{const rows=await getFeed({results:'100'});if(!rows.length){status('OFFLINE');msg('No data available from ThingSpeak.',true);return;}
-      if(routeDate===todayInToronto()){const unique=new Map(rawDaily.map(r=>[Number(r.entry_id),r]));for(const row of rows){const p=parse(row);if(p&&todayForDate(p.utc)===routeDate)unique.set(Number(row.entry_id),row);}rawDaily=Array.from(unique.values()).sort((a,b)=>Number(a.entry_id)-Number(b.entry_id)).slice(-8000);}
-      updateMetrics(rows.at(-1));draw();
-    }catch(e){status('OFFLINE');msg('ThingSpeak update failed: '+e.message+'. Check internet and Read API key.',true);}
-  }
-  function todayForDate(d){const arr=new Intl.DateTimeFormat('en-CA',{timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);const o=Object.fromEntries(arr.map(x=>[x.type,x.value]));return `${o.year}-${o.month}-${o.day}`}
-  function setFollow(){E('follow').textContent=following?'Follow ON':'Follow OFF';E('follow').classList.toggle('active',following)}
-  function setRoute(){E('route').textContent=showRoute?'Hide route':'Show route';E('route').classList.toggle('active',showRoute);draw()}
-  function fixMapSize(){if(map){map.invalidateSize({pan:false});}}
-  function initMap(){if(typeof L==='undefined'){msg('Map library did not load. Check internet or disable content blocking.',true);return;}
-    map=L.map('map',{zoomControl:false}).setView([45.5,-73.5],7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19,keepBuffer:4}).addTo(map);
-    L.control.zoom({position:'bottomright'}).addTo(map);
-    car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});
-    map.on('dragstart',()=>{following=false;setFollow()});
-    setTimeout(fixMapSize,200);setTimeout(fixMapSize,900);
-    window.addEventListener('resize',()=>setTimeout(fixMapSize,100));
-    window.addEventListener('orientationchange',()=>setTimeout(fixMapSize,350));
-  }
-  function openDialog(){E('channelId').value=channel;E('readKey').value=key;E('settingsDialog').showModal();}
-  E('openSettings').onclick=openDialog;
-  E('cancelSettings').onclick=()=>E('settingsDialog').close();
-  E('settingsForm').addEventListener('submit',e=>{e.preventDefault();const id=E('channelId').value.trim(),k=E('readKey').value.trim();if(!/^\d+$/.test(id)){E('channelId').setCustomValidity('Channel ID must be a number.');E('channelId').reportValidity();return;}E('channelId').setCustomValidity('');channel=id;key=k;try{if(E('remember').checked)localStorage.setItem(confKey,JSON.stringify({channel,key}));else localStorage.removeItem(confKey);}catch{}E('settingsDialog').close();loadDate();setTimeout(fixMapSize,100);});
-  E('follow').onclick=()=>{following=!following;setFollow();if(following&&car&&map&&map.hasLayer(car))map.panTo(car.getLatLng())};
-  E('route').onclick=()=>{showRoute=!showRoute;setRoute()};
-  E('fit').onclick=()=>{const pts=filtered(rawDaily).out.filter(p=>!p.break);if(!map||!pts.length)return;following=false;setFollow();const bounds=L.latLngBounds(pts.map(p=>[p.lat,p.lon]));if(pts.length<2)map.setView(bounds.getCenter(),15);else map.fitBounds(bounds.pad(.16));};
-  E('routeDate').onchange=()=>{routeDate=E('routeDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(routeDate))return;following=false;setFollow();haveView=false;loadDate()};
-  E('today').onclick=()=>{routeDate=todayInToronto();E('routeDate').value=routeDate;following=true;setFollow();haveView=false;loadDate();};
-  E('reload').onclick=()=>{loadDate();fixMapSize()};
-  try{const stored=JSON.parse(localStorage.getItem(confKey)||'null');if(stored&&/^\d+$/.test(stored.channel)){channel=stored.channel;key=stored.key||'';}}catch{}
-  initMap();routeDate=todayInToronto();E('routeDate').value=routeDate;
-  if(key)loadDate();else openDialog();timer=setInterval(()=>{if(!loading)poll()},30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){fixMapSize();if(key&&!loading)poll();}});
+  let marker=null;
+  if(highlightedTrips.length){marker=highlightedTrips.at(-1).points.at(-1)}
+  else if(tripSelection==='latest'&&routeDate===todayInToronto()&&latestRecord){
+   marker=parse(latestRecord);
+   if(marker){if(stablePosition&&(!Number.isFinite(marker.speed)||marker.speed<3.5||hav(stablePosition,marker)<12))marker=stablePosition;else stablePosition=marker;}
+  }else if(tripSelection==='all')marker=validSorted(rawDaily).at(-1)||null;
+  if(marker){const pos=[marker.lat,marker.lon];car.setLatLng(pos);if(!map.hasLayer(car))car.addTo(map);
+    if(!haveView){map.setView(pos,15);haveView=true;}
+    else if(following&&routeDate===todayInToronto()&&tripSelection==='latest')map.panTo(pos);
+    E('mapInfo').textContent=(tripSelection==='all'?`${detectedTrips.length} trips`:tripSelection==='latest'?'Latest trip':'Selected trip')+' · '+numeric(marker.lat,5)+', '+numeric(marker.lon,5);
+  } else {if(map.hasLayer(car))map.removeLayer(car);E('mapInfo').textContent=detectedTrips.length?'Select a trip to see its route':'No driving trips found for this date';}
+ }
+ function updateMetrics(rec,recentRows=[]){latestRecord=rec;if(!rec){status('WAITING');return}
+  const p=parse(rec);if(!p){status('OFFLINE');msg('ThingSpeak returned no valid GPS coordinates.',true);return}
+  const age=Math.max(0,(Date.now()-p.utc.getTime())/1000);
+  status(age<liveGapMs/1000?'ONLINE':'OFFLINE');E('speed').textContent=numeric(p.speed);
+  E('sats').textContent=Number.isFinite(p.sat)?Math.round(p.sat):'--';
+  E('gnss').textContent=`GPS ${Number.isFinite(p.gps)?Math.round(p.gps):'-'} / BDS ${Number.isFinite(p.bds)?Math.round(p.bds):'-'}`;
+  E('hdop').textContent=numeric(p.hdop,2);const [q,c]=hdopQuality(p.hdop);
+  E('quality').textContent=q;E('quality').className='x '+c;
+  E('alt').textContent=numeric(p.alt);E('last').textContent=clock.format(p.utc);
+  const motion=motionState(p,recentRows),mins=Math.floor(motion.durationMs/60000);
+  E('motion').textContent=motion.name;
+  E('motion').style.color=motion.name==='MOVING'?'#8ff4c1':motion.name==='STOPPED'?'#f3c777':motion.name==='PARKED'?'#a8dcff':'#ffc3c1';
+  E('age').textContent=motion.name==='OFFLINE'?(Math.round(age/60)+' min ago'):
+   motion.name==='MOVING'?'Driving':
+   (mins===0?'Stopped <1 min':`Stopped ${mins} min`);
+  if(age>=liveGapMs/1000)msg('Last GPS update is more than 2 minutes old. Showing saved position.');
+  else msg(`ThingSpeak connected · ${detectedTrips.length} trip(s) detected · ${motion.name}.`);
+ }
+ async function getFeed(params){const q=new URLSearchParams(params);if(key)q.set('api_key',key);const url=`https://api.thingspeak.com/channels/${channel}/feeds.json?${q}`;
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),16000);
+  try{const response=await fetch(url,{cache:'no-store',signal:controller.signal,credentials:'omit'});if(!response.ok)throw new Error('ThingSpeak HTTP '+response.status);
+   const json=await response.json();if(!json||!Array.isArray(json.feeds))throw new Error('Invalid ThingSpeak response');return json.feeds;
+  }finally{clearTimeout(timeout)}
+ }
+ async function loadDate(){if(!key){msg('Open Settings and enter your private Read API key.');return}
+  if(loading)return;loading=true;E('reload').disabled=true;const requested=routeDate;
+  try{
+   msg('Loading GPS trips for '+requested+' ...');
+   const rows=await getFeed({start:requested+' 00:00:00',end:requested+' 23:59:59',timezone:tz,results:'8000'});
+   if(requested!==routeDate)return;
+   rawDaily=rows;stablePosition=null;haveView=false;draw();
+   if(rows.length>=8000)msg('Reached 8000 ThingSpeak points. Older data on this date may be missing.');
+   else msg(`Found ${detectedTrips.length} driving trip(s) in ${rows.length} GPS entries. Select a trip below.`);
+   await poll();
+  }catch(e){msg('Cannot read ThingSpeak: '+e.message+'. Check Read key and connection.',true)}
+  finally{loading=false;E('reload').disabled=false}
+ }
+ async function poll(){if(!key)return;
+  try{const rows=await getFeed({results:'100'});
+   if(!rows.length){status('OFFLINE');msg('No data available from ThingSpeak.',true);return}
+   if(routeDate===todayInToronto()){
+    const unique=new Map(rawDaily.map(r=>[Number(r.entry_id),r]));
+    for(const row of rows){const p=parse(row);if(p&&dateInToronto(p.utc)===routeDate)unique.set(p.id,row)}
+    rawDaily=[...unique.values()].sort((a,b)=>Number(a.entry_id)-Number(b.entry_id)).slice(-8000);
+   }
+   draw();updateMetrics(rows.at(-1),rows);
+  }catch(e){status('OFFLINE');msg('ThingSpeak update failed: '+e.message+'. Check internet and Read API key.',true)}
+ }
+ function setFollow(){E('follow').textContent=following?'Follow ON':'Follow OFF';E('follow').classList.toggle('active',following)}
+ function setRoute(){E('route').textContent=showRoute?'Hide route':'Show route';E('route').classList.toggle('active',showRoute);draw()}
+ function fitRoute(){if(!map)return;const points=highlightedTrips.flatMap(t=>t.points);if(!points.length){msg('No driving positions in the selected trip.');return}
+  following=false;setFollow();const bounds=L.latLngBounds(points.map(p=>[p.lat,p.lon]));
+  if(points.length<2)map.setView(bounds.getCenter(),15);else map.fitBounds(bounds.pad(.15),{maxZoom:16});
+ }
+ function initMap(){if(typeof L==='undefined'){msg('Map library did not load. Check internet.',true);return}
+  map=L.map('map',{zoomControl:false}).setView([45.5,-73.5],7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});
+  map.on('dragstart',()=>{following=false;setFollow()});
+ }
+ function addBoundary(afterId,description){const markers=loadSplits();if(markers.includes(afterId)){msg('A manual trip boundary is already saved here.');return}
+  if(saveSplits([...markers,afterId])){tripSelection='latest';haveView=false;draw();msg(description)}
+ }
+ function newTrip(){if(routeDate!==todayInToronto()){msg('New Trip is for today. To split older trips, open Split older trips and select a time.',true);return}const list=validSorted(rawDaily);if(!list.length){msg('No GPS entries on this date. Refresh first.',true);return}
+  const last=list.at(-1);
+  // Boundaries occur AFTER the most recent cloud entry, so this action works
+  // whether the car is stopped or still transmitting stationary GPS samples.
+  addBoundary(last.id,`New Trip marked after ${timeClock.format(last.utc)}. The next driving data will start a separate trip.`);
+ }
+ function splitAtTime(){const value=E('splitTime').value;
+  if(!/^\d{2}:\d{2}$/.test(value)){msg('Choose the local time at which the next trip began.',true);return}
+  const rows=validSorted(rawDaily);const idx=rows.findIndex(p=>timeClock.format(p.utc)>=value);
+  if(idx<=0||idx>=rows.length){msg('The split time must fall between GPS updates on the selected date.',true);return}
+  const prev=rows[idx-1];addBoundary(prev.id,`Trip split saved at ${value} (before GPS entry ${rows[idx].id}).`);
+ }
+ function undoLastSplit(){const markers=loadSplits();if(!markers.length){msg('No manual trip split to undo.');return}
+  const removed=markers.at(-1);if(saveSplits(markers.filter(n=>n!==removed))){tripSelection='latest';haveView=false;draw();msg('Last manual trip boundary removed. GPS data was not deleted.')}
+ }
+ function openDialog(){E('channelId').value=channel;E('readKey').value=key;E('settingsDialog').showModal()}
+ E('openSettings').onclick=openDialog;E('cancelSettings').onclick=()=>E('settingsDialog').close();
+ E('settingsForm').addEventListener('submit',event=>{
+  event.preventDefault();const id=E('channelId').value.trim(),k=E('readKey').value.trim();
+  if(!/^\d+$/.test(id)){E('channelId').setCustomValidity('Channel ID must be a number.');E('channelId').reportValidity();return}
+  E('channelId').setCustomValidity('');channel=id;key=k;
+  try{if(E('remember').checked)localStorage.setItem(confKey,JSON.stringify({channel,key}));else localStorage.removeItem(confKey)}catch{}
+  E('settingsDialog').close();loadDate();
+ });
+ E('follow').onclick=()=>{following=!following;setFollow();if(following&&car&&map&&map.hasLayer(car))map.panTo(car.getLatLng())};
+ E('route').onclick=()=>{showRoute=!showRoute;setRoute()};E('fit').onclick=fitRoute;
+ E('tripSelect').onchange=()=>{tripSelection=E('tripSelect').value;following=false;setFollow();haveView=false;draw();if(highlightedTrips.length)fitRoute()};
+ E('newTrip').onclick=newTrip;E('splitAtTime').onclick=splitAtTime;E('undoSplit').onclick=undoLastSplit;
+ E('routeDate').onchange=()=>{const value=E('routeDate').value;if(!/^\d{4}-\d{2}-\d{2}$/.test(value))return;
+  routeDate=value;tripSelection='latest';following=false;setFollow();haveView=false;loadDate()};
+ E('today').onclick=()=>{routeDate=todayInToronto();E('routeDate').value=routeDate;tripSelection='latest';following=true;setFollow();haveView=false;loadDate()};
+ E('reload').onclick=loadDate;
+ try{const stored=JSON.parse(localStorage.getItem(confKey)||'null');if(stored&&/^\d+$/.test(stored.channel)){channel=stored.channel;key=stored.key||''}}catch{}
+ initMap();routeDate=todayInToronto();E('routeDate').value=routeDate;
+ if(key)loadDate();else openDialog();
+ timer=setInterval(()=>{if(!loading)poll()},30000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&key&&!loading)poll()});
+ // In-page test hook for offline regression tests. It contains NO credentials.
+ if(location.hostname==='localhost'||location.hostname==='127.0.0.1')window.__tripEngineTest={segmentTrips,parse,hav,isMovingPoint,motionState};
 })();
+
 </script>
-</body>
-</html>
+</body></html>
