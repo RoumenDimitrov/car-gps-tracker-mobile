@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#091c2e"><title>CAR GPS TRACKER - Mobile V2.1 Trips & Parking</title>
+<meta name="theme-color" content="#091c2e"><meta name="referrer" content="strict-origin-when-cross-origin"><title>CAR GPS TRACKER - Mobile V2.2 Map Repair</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo+pU3xIuMA6Bs=" crossorigin="anonymous">
 <style>
@@ -11,7 +11,7 @@
 header{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0e273e;border-bottom:1px solid var(--border)}.brand{font-size:14px;font-weight:850;letter-spacing:.04em;white-space:nowrap}.sub{font-size:10px;color:var(--muted);margin-top:2px}.head-right{display:flex;align-items:center;gap:7px}.pill{font-size:10px;font-weight:800;border-radius:50px;padding:5px 8px;color:#c4d9e4;background:#335165;white-space:nowrap}.pill.on{color:#7dffcf;background:#174b3f}.pill.off{color:#ffc3c1;background:#602e37}.pill.wait{color:#dfeef8;background:#3c5268}.settings{background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12px}
 #message{background:#102b43;color:#cde2f0;padding:6px 12px;font-size:11px;min-height:29px;border-bottom:1px solid #24455e}#message.error{color:#ffb7b7}
 .stats{padding:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.stat{min-width:0;background:var(--panel);border:1px solid #1e415d;border-radius:9px;padding:8px 5px 6px;text-align:center}.stat .k{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}.stat .v{display:block;font-size:18px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px;overflow:hidden;text-overflow:ellipsis}.stat .x{display:block;font-size:9px;color:#8fe6d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat .x.warn{color:#f3be74}.stat .x.bad{color:#ff9ba9}
-.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
+.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.tile-warning{position:absolute;z-index:610;top:10px;left:9px;max-width:calc(100% - 115px);background:#6f3b1eeb;border:1px solid #e8a36d;border-radius:8px;padding:7px 9px;color:#fff4d3;font-size:11px;pointer-events:none}.tile-warning[hidden]{display:none}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
 .tools{padding:10px 9px 5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tools label{font-size:12px;color:var(--muted)}input[type=date]{background:var(--panel2);color:var(--fg);border:1px solid var(--border);padding:8px 5px;min-height:41px;border-radius:8px;font-size:13px}.tools button,.action{background:#235274;border:1px solid #547c97;color:var(--fg);border-radius:8px;padding:9px 10px;font-size:12px;min-height:41px;font-weight:700}.tools .spacer{flex:1}.details{display:flex;gap:8px;flex-wrap:wrap;padding:3px 11px 13px;font-size:11px;color:var(--muted)}.details b{color:#d7effb}.help{margin:0 10px 14px;font-size:10px;color:#789caf;line-height:1.45}
 .trip-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:1px 9px 3px}.trip-toolbar label{font-size:12px;color:var(--muted)}
 .trip-toolbar select{min-width:0;flex:1 1 165px;max-width:430px;background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 9px;min-height:42px;font-size:13px}
@@ -28,7 +28,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
 </style>
 </head>
 <body>
-<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.1</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
+<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.2</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
 <div id="message" role="status" aria-live="polite">Enter the private ThingSpeak Read API key in Settings to connect.</div>
 <section class="stats" aria-label="Live GPS metrics">
  <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
@@ -36,7 +36,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  <div class="stat"><span class="k">Satellites</span><span class="v" id="sats">--</span><span class="x" id="gnss">GPS / BeiDou</span></div>
  <div class="stat"><span class="k">HDOP</span><span class="v" id="hdop">--</span><span class="x" id="quality">--</span></div>
 </section>
-<div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button></div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
+<div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button><button id="reloadMap" type="button" title="Retry loading map tiles">Reload map</button></div><div id="tileWarning" class="tile-warning" role="status" hidden>Some map tiles did not load. Tap Reload map.</div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
 <div class="tools"><label for="routeDate">History:</label><input type="date" id="routeDate"><button id="today" type="button">Today</button><button id="reload" type="button">Refresh</button></div>
 <div class="trip-toolbar"><label for="tripSelect">Trip:</label><select id="tripSelect" aria-label="Choose trip"><option value="latest">Latest trip</option><option value="all">All trips</option></select><button id="newTrip" type="button" class="new-trip">+ New Trip</button></div>
 <div class="trip-message"><strong id="tripCount">0</strong> trip(s) detected · Choose one trip for a clean map. "All trips" shows separate colored routes.</div>
@@ -56,7 +56,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  const speedThreshold=3.5, minimumMoveM=12, minimumTripM=20;
  const parkingSplitMs=10*60*1000, dataGapMs=10*60*1000, liveGapMs=120*1000;
  const palette=['#167bf1','#e89b25','#10aa85','#b66be5','#ec597c','#38a9c7','#a6b543'];
- let channel='1421143',key='',following=true,showRoute=true,map,car,routeLayers=[],haveView=false;
+ let channel='1421143',key='',following=true,showRoute=true,map,car,tilesLayer,routeLayers=[],haveView=false;
  let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,stablePosition=null;
  let tripSelection='latest',detectedTrips=[],highlightedTrips=[];
  const splitStorageKey=()=>`carGpsMobileV2Splits:${channel}:${routeDate}`;
@@ -254,8 +254,38 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  }
  function initMap(){if(typeof L==='undefined'){msg('Map library did not load. Check internet.',true);return}
   map=L.map('map',{zoomControl:false}).setView([45.5,-73.5],7);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);
+  // OSMF specifies the SINGLE tile.openstreetmap.org host. Leaflet's old
+  // {s}.tile.openstreetmap.org a/b/c subdomains are no longer recommended;
+  // mixing them can leave parts of the map blank. Keep browser caching on.
+  tilesLayer=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',
+    maxZoom:19,updateWhenIdle:true,updateWhenZooming:false,keepBuffer:2
+  });
+  let tileFailed=false;
+  tilesLayer.on('tileerror',()=>{
+    tileFailed=true;
+    E('tileWarning').hidden=false;
+  });
+  tilesLayer.on('load',()=>{
+    // Successful completion clears the warning only when the last batch
+    // had no failures; do not mask partial tile-load failures.
+    if(!tileFailed)E('tileWarning').hidden=true;
+  });
+  tilesLayer.addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
+  // Invalidate Leaflet's cached viewport dimensions after page layout and
+  // when the browser changes display size/orientation.
+  setTimeout(()=>map.invalidateSize({pan:false}),180);
+  window.addEventListener('resize',()=>map.invalidateSize({pan:false}));
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)setTimeout(()=>map.invalidateSize({pan:false}),120);
+  });
+  E('reloadMap').onclick=()=>{
+    tileFailed=false;
+    E('tileWarning').hidden=true;
+    map.invalidateSize({pan:false});
+    tilesLayer.redraw();
+  };
   car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});
   map.on('dragstart',()=>{following=false;setFollow()});
  }
