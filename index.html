@@ -2,16 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#091c2e"><meta name="referrer" content="strict-origin-when-cross-origin"><title>CAR GPS TRACKER - Mobile V2.3 Map Source Fix</title>
+<meta name="theme-color" content="#091c2e"><meta name="referrer" content="strict-origin-when-cross-origin"><title>CAR GPS TRACKER - Mobile V2.4 Leaflet Style Fix</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo+pU3xIuMA6Bs=" crossorigin="anonymous">
+<!-- Prefer independent CSS CDN. Javascript stays at the original version. -->
+<link rel="stylesheet" id="leafletMainCss" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" crossorigin="anonymous">
+<!-- Essential standalone Leaflet positioning fallback: keeps tiles properly placed if the external stylesheet is unavailable. -->
+<style id="leafletPositionFallback">
+.leaflet-container{position:relative;overflow:hidden;outline:0;background:#d6e2dc;touch-action:pan-x pan-y}
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer{position:absolute;left:0;top:0}
+.leaflet-map-pane canvas,.leaflet-map-pane svg{position:absolute}
+.leaflet-pane{z-index:400}
+.leaflet-tile-pane{z-index:200}
+.leaflet-overlay-pane{z-index:400}
+.leaflet-shadow-pane{z-index:500}
+.leaflet-marker-pane{z-index:600}
+.leaflet-tooltip-pane{z-index:650}
+.leaflet-popup-pane{z-index:700}
+.leaflet-tile{border:0;margin:0;max-width:none!important;max-height:none!important;user-select:none;-webkit-user-select:none}
+.leaflet-tile-container{pointer-events:none}
+.leaflet-zoom-animated{transform-origin:0 0}
+.leaflet-control{position:relative;z-index:800;pointer-events:auto}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+.leaflet-top{top:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}.leaflet-right{right:0}
+.leaflet-left .leaflet-control{float:left;clear:both}.leaflet-right .leaflet-control{float:right;clear:both}
+.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
+.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}
+.leaflet-control-zoom a{display:block;text-align:center;width:30px;height:30px;line-height:30px;text-decoration:none;background:white;color:#222;font:700 22px Arial; border-bottom:1px solid #ccc}
+.leaflet-control-zoom{overflow:hidden;border:2px solid #aaa;border-radius:5px}
+.leaflet-control-attribution{background:#fff9;color:#333;font:11px Arial;padding:1px 5px}
+.leaflet-control-attribution a{color:#1673af}
+.leaflet-grab{cursor:grab}.leaflet-dragging .leaflet-grab{cursor:grabbing}
+</style>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color-scheme:dark;--bg:#091c2e;--panel:#112a42;--panel2:#18364f;--border:#31516a;--fg:#e7f4ff;--muted:#9ebbd0;--accent:#25ac8b}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg)}body{max-width:1200px;margin:0 auto}button,input,select{font:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #8ce5fc;outline-offset:2px}
 header{padding:11px 12px 9px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0e273e;border-bottom:1px solid var(--border)}.brand{font-size:14px;font-weight:850;letter-spacing:.04em;white-space:nowrap}.sub{font-size:10px;color:var(--muted);margin-top:2px}.head-right{display:flex;align-items:center;gap:7px}.pill{font-size:10px;font-weight:800;border-radius:50px;padding:5px 8px;color:#c4d9e4;background:#335165;white-space:nowrap}.pill.on{color:#7dffcf;background:#174b3f}.pill.off{color:#ffc3c1;background:#602e37}.pill.wait{color:#dfeef8;background:#3c5268}.settings{background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12px}
 #message{background:#102b43;color:#cde2f0;padding:6px 12px;font-size:11px;min-height:29px;border-bottom:1px solid #24455e}#message.error{color:#ffb7b7}
 .stats{padding:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.stat{min-width:0;background:var(--panel);border:1px solid #1e415d;border-radius:9px;padding:8px 5px 6px;text-align:center}.stat .k{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap}.stat .v{display:block;font-size:18px;font-weight:850;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px;overflow:hidden;text-overflow:ellipsis}.stat .x{display:block;font-size:9px;color:#8fe6d1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stat .x.warn{color:#f3be74}.stat .x.bad{color:#ff9ba9}
-.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.tile-warning{position:absolute;z-index:610;top:10px;left:9px;max-width:calc(100% - 115px);background:#6f3b1eeb;border:1px solid #e8a36d;border-radius:8px;padding:7px 9px;color:#fff4d3;font-size:11px;pointer-events:none}.tile-warning[hidden]{display:none}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
+.map-shell{position:relative;margin:0 8px;border:1px solid #45687b;border-radius:10px;overflow:hidden;background:#283a43}#map{height:clamp(335px,62dvh,720px);width:100%;background:#d6e2dc}.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important}.map-actions{position:absolute;z-index:500;right:9px;top:9px;display:flex;flex-direction:column;gap:6px;align-items:stretch}.map-actions button{font-size:11px;padding:9px 8px;background:rgba(12,39,59,.94);color:white;border:1px solid #88abc1;border-radius:8px;min-width:76px}.map-actions button.active{background:#157e64;border-color:#36d0a4}.tile-warning{position:absolute;z-index:610;top:10px;left:9px;max-width:calc(100% - 115px);background:#6f3b1eeb;border:1px solid #e8a36d;border-radius:8px;padding:7px 9px;color:#fff4d3;font-size:11px;pointer-events:none}.tile-warning[hidden]{display:none}.map-debug{position:absolute;z-index:610;top:8px;left:9px;max-width:calc(100% - 130px);padding:4px 6px;background:#132d43dd;color:#e8f4ff;border-radius:5px;font-size:10px;pointer-events:none}.tile-warning:not([hidden])~.map-debug{top:48px}.map-overlay{position:absolute;z-index:500;bottom:9px;left:9px;pointer-events:none;border-radius:6px;padding:6px 9px;background:rgba(12,35,53,.84);font-size:11px;color:#d2f3fa;max-width:calc(100% - 20px)}
 .tools{padding:10px 9px 5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.tools label{font-size:12px;color:var(--muted)}input[type=date]{background:var(--panel2);color:var(--fg);border:1px solid var(--border);padding:8px 5px;min-height:41px;border-radius:8px;font-size:13px}.tools button,.action{background:#235274;border:1px solid #547c97;color:var(--fg);border-radius:8px;padding:9px 10px;font-size:12px;min-height:41px;font-weight:700}.tools .spacer{flex:1}.details{display:flex;gap:8px;flex-wrap:wrap;padding:3px 11px 13px;font-size:11px;color:var(--muted)}.details b{color:#d7effb}.help{margin:0 10px 14px;font-size:10px;color:#789caf;line-height:1.45}
 .trip-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:1px 9px 3px}.trip-toolbar label{font-size:12px;color:var(--muted)}
 .trip-toolbar select{min-width:0;flex:1 1 165px;max-width:430px;background:var(--panel2);color:var(--fg);border:1px solid var(--border);border-radius:8px;padding:8px 9px;min-height:42px;font-size:13px}
@@ -28,7 +56,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
 </style>
 </head>
 <body>
-<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.3</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
+<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.4</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
 <div id="message" role="status" aria-live="polite">Enter the private ThingSpeak Read API key in Settings to connect.</div>
 <section class="stats" aria-label="Live GPS metrics">
  <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
@@ -36,7 +64,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  <div class="stat"><span class="k">Satellites</span><span class="v" id="sats">--</span><span class="x" id="gnss">GPS / BeiDou</span></div>
  <div class="stat"><span class="k">HDOP</span><span class="v" id="hdop">--</span><span class="x" id="quality">--</span></div>
 </section>
-<div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button><button id="mapSource" type="button" title="Switch to the other map tile provider">Map: TOPO</button><button id="reloadMap" type="button" title="Retry loading map tiles">Reload map</button></div><div id="tileWarning" class="tile-warning" role="status" hidden>Some map tiles did not load. Try Map: OSM / TOPO.</div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
+<div class="map-shell"><div id="map" role="application" aria-label="GPS map"></div><div class="map-actions"><button id="follow" class="active" type="button">Follow ON</button><button id="route" class="active" type="button">Hide route</button><button id="fit" type="button">Fit route</button><button id="mapSource" type="button" title="Switch to the other map tile provider">Map: TOPO</button><button id="reloadMap" type="button" title="Retry loading map tiles">Reload map</button></div><div id="tileWarning" class="tile-warning" role="status" hidden>Some map tiles did not load. Try Map: OSM / TOPO.</div><div id="mapDebug" class="map-debug" role="status">Checking map styles...</div><div id="mapInfo" class="map-overlay">Map waiting for coordinates...</div></div>
 <div class="tools"><label for="routeDate">History:</label><input type="date" id="routeDate"><button id="today" type="button">Today</button><button id="reload" type="button">Refresh</button></div>
 <div class="trip-toolbar"><label for="tripSelect">Trip:</label><select id="tripSelect" aria-label="Choose trip"><option value="latest">Latest trip</option><option value="all">All trips</option></select><button id="newTrip" type="button" class="new-trip">+ New Trip</button></div>
 <div class="trip-message"><strong id="tripCount">0</strong> trip(s) detected · Choose one trip for a clean map. "All trips" shows separate colored routes.</div>
@@ -270,15 +298,20 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
   E('mapSource').title='Currently '+chosen.label+'; tap to switch map provider';
   E('tileWarning').hidden=true;
   let pending=0,success=0,errors=0;
+  function setTileDebug(){
+   const el=E('mapDebug');if(!el)return;
+   const tileSample=document.querySelector('.leaflet-tile');
+   const cssOk=!tileSample||getComputedStyle(tileSample).position==='absolute';
+   el.textContent='Map diagnostics: '+chosen.label+' · started '+pending+' · loaded '+success+' · failed '+errors+' · '+(cssOk?'CSS OK':'CSS MISSING');
+  }
   const layer=L.tileLayer(chosen.url,{
    attribution:chosen.attribution,maxZoom:19,maxNativeZoom:chosen.maxNativeZoom,
-   updateWhenIdle:true,updateWhenZooming:false,keepBuffer:1,
-   crossOrigin:false
+   updateWhenIdle:false,updateWhenZooming:true,keepBuffer:2
   });
-  layer.on('tileloadstart',()=>{pending++});
-  layer.on('tileload',()=>{success++;});
+  layer.on('tileloadstart',()=>{pending++;setTileDebug()});
+  layer.on('tileload',()=>{success++;setTileDebug()});
   layer.on('tileerror',()=>{
-   errors++;
+   errors++;setTileDebug();
    E('tileWarning').textContent='Map tiles unavailable ('+chosen.label+'). Tap Map: '+(name==='osm'?'TOPO':'OSM')+' to try another server.';
    E('tileWarning').hidden=false;
   });
@@ -290,11 +323,12 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
   tilesLayer=layer;
   layer.addTo(map);
   layer.bringToBack();
+  setTimeout(setTileDebug,450);
   try{localStorage.setItem(mapSourceStorage,name)}catch{}
   if(announce)msg('Map provider: '+chosen.label+'. GPS history and ThingSpeak settings are unchanged.');
   setTimeout(()=>{
    if(tilesLayer!==layer)return;
-   map.invalidateSize({pan:false});
+   map.invalidateSize({pan:false});setTileDebug();
    if(pending>0&&success===0&&errors===0){
     E('tileWarning').textContent='Map image requests are not completing. Tap Map: '+(name==='osm'?'TOPO':'OSM')+' to switch source.';
     E('tileWarning').hidden=false;
@@ -317,8 +351,8 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
   E('reloadMap').onclick=()=>{
    E('tileWarning').hidden=true;
    map.invalidateSize({pan:false});
-   // Explicit action by user; do not redraw tiles at every GPS refresh.
-   tilesLayer.redraw();
+   // User-requested fresh tile layer; keep the GPS location, trip, and settings.
+   setSource(currentProvider,true);
   };
   car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});
   map.on('dragstart',()=>{following=false;setFollow()});
