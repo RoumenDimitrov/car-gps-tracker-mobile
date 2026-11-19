@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#091c2e"><meta name="referrer" content="strict-origin-when-cross-origin"><title>CAR GPS TRACKER - Mobile V2.4 Leaflet Style Fix</title>
+<meta name="theme-color" content="#091c2e"><meta name="referrer" content="strict-origin-when-cross-origin"><title>CAR GPS TRACKER - Mobile V2.5 Blue Route & Faster Motion</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <!-- Prefer independent CSS CDN. Javascript stays at the original version. -->
 <link rel="stylesheet" id="leafletMainCss" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" crossorigin="anonymous">
@@ -56,7 +56,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
 </style>
 </head>
 <body>
-<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.4</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
+<header><div><div class="brand">CAR GPS TRACKER <span style="color:#68d8c2">MOBILE V2.5</span></div><div class="sub">Direct from ThingSpeak - PC not required</div></div><div class="head-right"><span id="online" class="pill wait">WAITING</span><button id="openSettings" class="settings" type="button">Settings</button></div></header>
 <div id="message" role="status" aria-live="polite">Enter the private ThingSpeak Read API key in Settings to connect.</div>
 <section class="stats" aria-label="Live GPS metrics">
  <div class="stat"><span class="k">Speed</span><span class="v" id="speed">--</span><span class="x">km/h</span></div>
@@ -70,7 +70,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
 <div class="trip-message"><strong id="tripCount">0</strong> trip(s) detected · Choose one trip for a clean map. "All trips" shows separate colored routes.</div>
 <details class="trip-edit"><summary>Split older trips / Undo manual split</summary><div class="edit-tools"><label for="splitTime">Next trip started at (Toronto time)</label><input type="time" id="splitTime"><button id="splitAtTime" type="button">Split at time</button><button id="undoSplit" type="button">Undo last split</button></div><small>New Trip marks the next incoming GPS data as a separate trip. Splits are saved only in this browser, not in ThingSpeak or the Windows database.</small></details>
 <div class="details"><span>Altitude: <b id="alt">--</b> m</span><span>Visible date: <b id="viewDate">--</b></span><span>Route distance*: <b id="distance">0.00</b> km</span><span>Positions: <b id="points">0</b></span><span>Last update: <b id="last">--</b></span></div>
-<p class="help">*Distance is calculated separately for each trip from filtered GPS positions. Automatic trip split after 10 min stopped or a 10 min gap in telemetry. Manual split markers stay only on this phone/browser. Nothing is written to ThingSpeak, and the Windows application is unchanged. The mobile page refreshes every 30 seconds while open.</p>
+<p class="help">*Distance is calculated separately for each trip from filtered GPS positions. Automatic trip split after 10 min stopped or a 10 min gap in telemetry. Manual split markers stay only on this phone/browser. Nothing is written to ThingSpeak, and the Windows application is unchanged. The mobile page checks for new ThingSpeak data every 10 seconds while open; the tracker itself normally uploads about every 20 seconds. Movement can also be detected from distance between successive GPS fixes when reported speed is zero.</p>
 <dialog id="settingsDialog"><form id="settingsForm" method="dialog"><h2>ThingSpeak connection</h2><p>Private channel: use the <strong>READ API key</strong> only. Never enter the Write API key. The key is not included in this website's source files.</p><label for="channelId">Channel ID</label><input id="channelId" type="text" inputmode="numeric" required pattern="[0-9]+" value="1421143"><label for="readKey">Read API key</label><input id="readKey" type="password" autocomplete="off" spellcheck="false" placeholder="Private Read API key"><label class="check"><input id="remember" type="checkbox" checked>Remember Read API key on this device</label><p>When enabled, the key stays in this browser's local storage. Use only on your own phone. Without this option, you need to enter it again after refreshing.</p><menu><button type="button" id="cancelSettings">Cancel</button><button class="primary" type="submit">Connect</button></menu></form></dialog>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script>
@@ -81,11 +81,11 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  const clock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'short',day:'numeric'});
  const timeClock=new Intl.DateTimeFormat('en-CA',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
  const numeric=(v,d=1)=>Number.isFinite(v)?v.toFixed(d):'--';
- const speedThreshold=3.5, minimumMoveM=12, minimumTripM=20;
+ const speedThreshold=3.5, minimumMoveM=12, inferredMoveM=20, inferredSpeedKmh=4.5, minimumTripM=20;
  const parkingSplitMs=10*60*1000, dataGapMs=10*60*1000, liveGapMs=120*1000;
- const palette=['#167bf1','#e89b25','#10aa85','#b66be5','#ec597c','#38a9c7','#a6b543'];
+ const palette=['#075bff','#006dc6','#277fe8','#2647d8','#0e8fe1','#1655b6','#4474e8'];
  let channel='1421143',key='',following=true,showRoute=true,map,car,tilesLayer,routeLayers=[],haveView=false;
- let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,stablePosition=null;
+ let routeDate='',rawDaily=[],latestRecord=null,timer=null,loading=false,pollBusy=false,stablePosition=null;
  let tripSelection='latest',detectedTrips=[],highlightedTrips=[];
  const splitStorageKey=()=>`carGpsMobileV2Splits:${channel}:${routeDate}`;
  function msg(text,err=false){E('message').textContent=text;E('message').classList.toggle('error',err)}
@@ -101,14 +101,26 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  }
  function hav(a,b){const r=Math.PI/180,dlat=(b.lat-a.lat)*r,dlon=(b.lon-a.lon)*r,x=Math.sin(dlat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dlon/2)**2;return 6371000*2*Math.atan2(Math.sqrt(x),Math.sqrt(Math.max(0,1-x)))}
  function validSorted(rows){return rows.map(parse).filter(Boolean).sort((a,b)=>a.utc-b.utc||a.id-b.id)}
- // Distinguish valid movement from GPS jitter; speed alone is not enough.
+ // City driving: with a ~20 s ThingSpeak upload, GPS may report speed 0
+ // at both ends of a short move (e.g. two traffic lights). Use actual position
+ // displacement as an additional source of movement evidence. Reject small
+ // movements and impossible jumps to avoid GPS jitter being labelled driving.
  function isMovingPoint(p,prev){
-  if(!p||!prev||!Number.isFinite(p.speed)||p.speed<speedThreshold)return false;
+  if(!p||!prev)return false;
   const seconds=(p.utc-prev.utc)/1000;
   if(seconds<=0||seconds>liveGapMs/1000)return false;
   const distance=hav(prev,p);
   if(distance<minimumMoveM)return false;
-  const typicalKmh=Math.max(p.speed,Number.isFinite(prev.speed)?prev.speed:0);
+  const inferredKmh=distance/seconds*3.6;
+  if(!Number.isFinite(inferredKmh)||inferredKmh>160)return false;
+  const speedNow=Number.isFinite(p.speed)?p.speed:0;
+  const speedBefore=Number.isFinite(prev.speed)?prev.speed:0;
+  const speedEvidence=speedNow>=speedThreshold||
+    (speedBefore>=speedThreshold&&inferredKmh>=2.5);
+  const locationEvidence=distance>=inferredMoveM&&inferredKmh>=inferredSpeedKmh&&
+    (!Number.isFinite(p.hdop)||p.hdop<=4);
+  if(!speedEvidence&&!locationEvidence)return false;
+  const typicalKmh=Math.max(speedNow,speedBefore,inferredKmh);
   const plausibleMax=Math.max(120,(typicalKmh/3.6)*seconds*2.5+35);
   return distance<=plausibleMax;
  }
@@ -206,7 +218,11 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
   if(showRoute){
    highlightedTrips.forEach(t=>{
     const index=detectedTrips.indexOf(t),color=palette[index%palette.length],name=`Trip ${index+1}`;
-    const line=L.polyline(t.points.map(p=>[p.lat,p.lon]),{color,weight:4,opacity:.89});
+    const coords=t.points.map(p=>[p.lat,p.lon]);
+    // A thin white outline keeps the route legible over orange/yellow main roads.
+    const halo=L.polyline(coords,{color:'#ffffff',weight:9,opacity:.86,interactive:false});
+    halo.addTo(map);routeLayers.push(halo);
+    const line=L.polyline(coords,{color,weight:6,opacity:.98,lineCap:'round',lineJoin:'round'});
     line.bindPopup(`${name} · ${(t.meters/1000).toFixed(2)} km · ${timeClock.format(t.start)}–${timeClock.format(t.end)}`);
     line.addTo(map);routeLayers.push(line);
     const start=L.circleMarker([t.points[0].lat,t.points[0].lon],{radius:5,color:'#fff',weight:2,fillColor:'#09a977',fillOpacity:1}).bindTooltip(`${name} START`).addTo(map);
@@ -215,11 +231,19 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
    });
   }
   let marker=null;
-  if(highlightedTrips.length){marker=highlightedTrips.at(-1).points.at(-1)}
-  else if(tripSelection==='latest'&&routeDate===todayInToronto()&&latestRecord){
-   marker=parse(latestRecord);
-   if(marker){if(stablePosition&&(!Number.isFinite(marker.speed)||marker.speed<3.5||hav(stablePosition,marker)<12))marker=stablePosition;else stablePosition=marker;}
-  }else if(tripSelection==='all')marker=validSorted(rawDaily).at(-1)||null;
+  // Latest trip view follows the newest GPS fix even before a newly started
+  // trip has accumulated enough points to appear as a complete route.
+  if(tripSelection==='latest'&&routeDate===todayInToronto()&&latestRecord){
+   const fresh=parse(latestRecord);
+   if(fresh){
+    if(!stablePosition)stablePosition=fresh;
+    else if(isMovingPoint(fresh,stablePosition)||
+      (hav(stablePosition,fresh)>=inferredMoveM&&Number.isFinite(fresh.speed)&&fresh.speed>=speedThreshold))stablePosition=fresh;
+    marker=stablePosition;
+   }
+  }
+  if(!marker&&highlightedTrips.length)marker=highlightedTrips.at(-1).points.at(-1);
+  else if(!marker&&tripSelection==='all')marker=validSorted(rawDaily).at(-1)||null;
   if(marker){const pos=[marker.lat,marker.lon];car.setLatLng(pos);if(!map.hasLayer(car))car.addTo(map);
     if(!haveView){map.setView(pos,15);haveView=true;}
     else if(following&&routeDate===todayInToronto()&&tripSelection==='latest')map.panTo(pos);
@@ -263,16 +287,26 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
   }catch(e){msg('Cannot read ThingSpeak: '+e.message+'. Check Read key and connection.',true)}
   finally{loading=false;E('reload').disabled=false}
  }
- async function poll(){if(!key)return;
-  try{const rows=await getFeed({results:'100'});
+ async function poll(){
+  if(!key||pollBusy)return;
+  pollBusy=true;
+  try{
+   // ThingSpeak documents that feeds with results<=100 are not 5-min cached.
+   // Only fetch a short recent window; refresh the whole day on demand.
+   const rows=await getFeed({results:'100'});
    if(!rows.length){status('OFFLINE');msg('No data available from ThingSpeak.',true);return}
    if(routeDate===todayInToronto()){
     const unique=new Map(rawDaily.map(r=>[Number(r.entry_id),r]));
     for(const row of rows){const p=parse(row);if(p&&dateInToronto(p.utc)===routeDate)unique.set(p.id,row)}
     rawDaily=[...unique.values()].sort((a,b)=>Number(a.entry_id)-Number(b.entry_id)).slice(-8000);
    }
-   draw();updateMetrics(rows.at(-1),rows);
+   // The car marker needs the most recent cloud entry before rendering,
+   // and the status message should use the newly refreshed trip count.
+   latestRecord=rows.at(-1);
+   draw();
+   updateMetrics(latestRecord,rows);
   }catch(e){status('OFFLINE');msg('ThingSpeak update failed: '+e.message+'. Check internet and Read API key.',true)}
+  finally{pollBusy=false}
  }
  function setFollow(){E('follow').textContent=following?'Follow ON':'Follow OFF';E('follow').classList.toggle('active',following)}
  function setRoute(){E('route').textContent=showRoute?'Hide route':'Show route';E('route').classList.toggle('active',showRoute);draw()}
@@ -354,7 +388,7 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
    // User-requested fresh tile layer; keep the GPS location, trip, and settings.
    setSource(currentProvider,true);
   };
-  car=L.circleMarker([45.5,-73.5],{radius:8,color:'white',weight:3,fillColor:'#ec2846',fillOpacity:1});
+  car=L.circleMarker([45.5,-73.5],{radius:12,color:'#ffffff',weight:3.5,fillColor:'#ed174d',fillOpacity:1});
   map.on('dragstart',()=>{following=false;setFollow()});
  }
  function addBoundary(afterId,description){const markers=loadSplits();if(markers.includes(afterId)){msg('A manual trip boundary is already saved here.');return}
@@ -395,8 +429,9 @@ dialog{background:#112b42;border:1px solid #5b819a;border-radius:14px;padding:19
  try{const stored=JSON.parse(localStorage.getItem(confKey)||'null');if(stored&&/^\d+$/.test(stored.channel)){channel=stored.channel;key=stored.key||''}}catch{}
  initMap();routeDate=todayInToronto();E('routeDate').value=routeDate;
  if(key)loadDate();else openDialog();
- timer=setInterval(()=>{if(!loading)poll()},30000);
+ timer=setInterval(()=>{if(!loading)poll()},10000);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&key&&!loading)poll()});
+ window.addEventListener('online',()=>{if(key&&!loading)poll()});
  // In-page test hook for offline regression tests. It contains NO credentials.
  if(location.hostname==='localhost'||location.hostname==='127.0.0.1')window.__tripEngineTest={segmentTrips,parse,hav,isMovingPoint,motionState};
 })();
